@@ -16,13 +16,6 @@ import Grammar
 --        | Modulo Exp Exp | Length String | NotEquals Exp Exp | JustIf Exp Block | Sum String
 --        | Reverse String deriving (Show,Eq)
 
---data Expr = TmInt Int | TmTrue | TmFalse | TmUnit | TmCompare Expr Expr 
---           | TmPair Expr Expr | TmAdd Expr Expr | TmVar String 
---           | TmFst Expr | TmSnd Expr
---           | TmIf Expr Expr Expr | TmLet String ToyType Expr Expr
---           | TmLambda String ToyType Expr | TmApp Expr Expr
---           | Cl ( String ToyType Expr Environment)
-
 type TypeEnvironment = [ (String,Type) ]
 
 getBinding :: String -> TypeEnvironment -> Type
@@ -35,12 +28,15 @@ addBinding x t tenv = (x,t):tenv
 
 typeOf :: TypeEnvironment -> Exp -> Type
 -- needs fixing
-typeOf tenv (Variable e1 e2 e3) = StringT
-typeOf tenv (UpdateVar e1 e2) = StringT
 typeOf tenv (If e1 e2 e3) = StringT
 --typeOf tenv (If e1 e2 e3) | t2 == t3 = t2
 --  where (Boolean,t2,t3) = (typeOf tenv e1, typeOf tenv e2, typeOf tenv e3)
 
+--typeOf tenv (If e1 e2 e3) = 
+
+-- some issue with UpdateVar 
+typeOf tenv (UpdateVar x e2) | t1 == t2 = t2
+  where (t1, t2) = (getBinding x tenv, typeOf tenv e2)
 
 typeOf tenv (TmInt _)  = Integer
 
@@ -48,9 +44,9 @@ typeOf tenv (TTrue) = Boolean
 
 typeOf tenv (TFalse) = Boolean
 
--- added 
+typeOf tenv (Variable t x e1) = t
 
-typeOf tenv (Var e2) = StringT
+typeOf tenv (Var x) = getBinding x tenv
 
 typeOf tenv (ReadFLine e1) = List
 
@@ -91,8 +87,8 @@ typeOf tenv (Pop e1) = Integer
 
 
 -- it doesn't like e1 for some reason
-typeOf tenv (Push e1 e2) = List
-  where (StringT, Integer) = (typeOf tenv e1, typeOf tenv e2)
+--typeOf tenv (Push e1 e2) = List
+--  where (StringT, Integer) = (typeOf tenv e1, typeOf tenv e2)
 
 --typeOf tenv (WhileLoop e1 e2) = t2
 --  where (Boolean, t2) = (typeOf tenv e1, typeOf tenv e2) 
