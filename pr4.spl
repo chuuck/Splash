@@ -1,0 +1,24 @@
+List results = []
+Integer a = 0
+Integer b = 0
+Integer c = 0
+
+Integer counter = 0
+
+Integer listLength = mylist1.length()
+
+while (counter < listLength){
+	
+	a = mylist1.pop()
+	b = mylist1.pop()
+	c = mylist1.pop()
+
+	results.push(c)
+	results.push(2*b)
+	results.push(3*a-1)
+
+	counter = counter + 1
+	listLength = mylist1.length()
+}
+
+results.reverse()
