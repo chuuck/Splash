@@ -1,0 +1,15 @@
+List results = []
+Integer counter = 0
+Integer a = 0
+Integer new = 0
+
+Integer listLength = mylist1.length()
+
+while (counter < listLength ){
+	new = mylist1.pop()
+	a = a + new
+	results.push(a)
+	counter = counter + 1
+}
+
+results.reverse()

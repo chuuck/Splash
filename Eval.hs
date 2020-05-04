@@ -176,13 +176,13 @@ eval1 ((Pop varName),env, k) = (mytestvar, env2, k)
 --Evaluation rules for push operation on a list
 eval1 ((Push varName e), env, k) = (e', env, (HPush varName):k)
             where e' = if (isValueVar e) then getValueBinding (unparse e) env else e
-eval1 ((TmInt n), env, (HPush varName):k) = ((TmInt n), env2, k)
+eval1 ((TmInt n), env, (HPush varName):k) = ((ListVar my_new_list), env2, k)
                   where env2 = updateEnv env varName (ListVar my_new_list)
                         my_new_list = (TmInt n) : my_list
                         my_list = getList (getValueBinding varName env)
 
 --Evalation rules for revers operation on a list
-eval1 ((Reverse varName), env, k) = (TTrue, env2, k)
+eval1 ((Reverse varName), env, k) = ((ListVar updatedList), env2, k)
                        where env2 = updateEnv env varName (ListVar updatedList)
                              updatedList = reverse my_list
                              my_list = getList (getValueBinding varName env) 
@@ -199,7 +199,12 @@ eval1 ((Variable varType varName varValue), env, k) = (varValue, env, (HVariable
 eval1 ((TmInt n), env, (HVariable varType varName):k) = (TmInt n, (varName, (TmInt n)) : env, k)
 eval1 ((TTrue), env, (HVariable varType varName):k) = (TTrue, (varName, TTrue) : env, k)
 eval1 ((TFalse), env, (HVariable varType varName):k) = (TFalse, (varName, TFalse) : env, k)
-eval1 ((ListVar xs), env, (HVariable varType varName):k) = (TTrue, (varName, (ListVar xs)) : env, k)
+eval1 ((ListVar xs), env, (HVariable varType varName):k) = (TTrue, (varName, (ListVar evaluatedList)) : env, k)
+                        where evaluatedList = checkForNegate xs
+eval1 ((Negate (TmInt n)), env, (HVariable varType varName):k) = (TmInt (0-n), (varName, (TmInt (0-n))) : env, k)
+
+
+eval1 ((Negate (TmInt n)), env, k) = (TmInt (0-n), env, k)
 
 -- Rule for runtime errors
 eval1 (e,env,k) = error "Evaluation Error"
@@ -213,6 +218,13 @@ evalLoop (e, env) = evalLoop' (e,env,[])
 mainLoop ((e:es), env) = if (es == []) then evalLoop (e, env) else mainLoop (es, env')
             where (e', env', k) = evalLoop (e, env)
 
+
+--checkForNegate:: Exp -> Exp
+checkForNegate [] = []
+checkForNegate (x:xs) = patNegate x : checkForNegate xs
+
+patNegate (TmInt n) = TmInt n
+patNegate (Negate (TmInt n)) = TmInt (0-n)
 
 -- Function to unparse underlying values from the AST term
 --unparse :: Exp -> String 

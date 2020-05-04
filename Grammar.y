@@ -26,7 +26,6 @@ import Tokens
     '*'                 { TokenTimes _ }
     '{'                 { TokenLCurlyBrack _ }
     '}'                 { TokenRCurlyBrack _ }
-    ';'                 { TokenSemi _ }
     ']'                 { TokenRSquareBrack _ }
     '['                 { TokenLSquareBrack _ }
     ','                 { TokenComma _ }
@@ -44,14 +43,11 @@ import Tokens
     Str                 { TokenTypeString _ }
     List                { TokenTypeList _ }
     File                { TokenTypeFile _ }
-    print               { TokenPrint _ }
     if                  { TokenIf _ }
     else                { TokenElse _ }
     true                { TokenTrue _ }
     false               { TokenFalse _ }
     while               { TokenWhile _ }
-    end                 { TokenEnd _ }
-    println             { TokenPrintln _ }
     push                { TokenPush _ }
     pop                 { TokenPop _ }
     modulo              { TokenModulo _ }
@@ -62,11 +58,12 @@ import Tokens
     int                 { TokenInt _ $$ } 
     var                 { TokenVar _ $$ } 
 
-
-    readFLine           { TokenReadFLine _ }
-
 %right '='
-%left '*' '-' ';' '+'
+%left '*' '-' '+' 
+%left NEG
+%nonassoc '>' '<' '<=' '>=' '!=' '=='
+%nonassoc Boolean Integer Str List File if else true false while push pop modulo length sum reverse
+%nonassoc '[' ']' '{' '}' ',' '(' ')' '.' '"'
 
 
 %% 
@@ -87,14 +84,11 @@ Exp : Type var '=' Exp                                  { Variable $1 $2 $4 }
     | true                                              { TTrue }
     | false                                             { TFalse }
     | '"' var '"'                                       { Var $2 }
-    | var '.' readFLine                                 { ReadFLine $1 }
-    | print '(' Exp ')'                                 { Print $3 }
     | var                                               { VarName $1}
     | Exp '+' Exp                                       { Plus $1 $3 }
     | Exp '-' Exp                                       { Minus $1 $3 }
     | Exp '*' Exp                                       { Times $1 $3 }
     | if '(' Exp ')' '{' Block '}' else '{' Block '}'   { If $3 $6 $10 }
-    | end                                               { End }
     | '[' ExpList ']'                                   { ListVar $2 }
     | Exp '>' Exp                                       { GTGram $1 $3 }
     | Exp '<' Exp                                       { LTGram $1 $3 }
@@ -110,6 +104,7 @@ Exp : Type var '=' Exp                                  { Variable $1 $2 $4 }
     | if '(' Exp ')' '{' Block '}'                      { JustIf $3 $6 }
     | var '.' sum '(' ')'                               { Sum $1 }
     | var '.' reverse '(' ')'                           { Reverse $1 }
+    | '-' Exp %prec NEG                                 { Negate $2 }
 
 Type : Integer               { Integer }
     | Str                    { StringT }
@@ -143,8 +138,6 @@ data Exp =
         Variable Type String Exp
         | TmInt Int
         | Var String
-        | ReadFLine String
-        | Print Exp
         | VarName String
         | Plus Exp Exp
         | Minus Exp Exp
@@ -152,7 +145,6 @@ data Exp =
         | If Exp Block Block
         | TTrue
         | TFalse
-        | End
         | ListVar ExpList
         | GTGram Exp Exp
         | LTGram Exp Exp
@@ -169,6 +161,7 @@ data Exp =
         | JustIf Exp Block
         | Sum String
         | Reverse String
+        | Negate Exp
     
 
          deriving (Show,Eq)
