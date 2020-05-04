@@ -21,26 +21,30 @@
         code <- readFile fileName
 
         let my_tokens = alexScanTokens code
-        putStrLn ("Tokens: " ++ show my_tokens)
+        --putStrLn ("Tokens: " ++ show my_tokens)
         let parsed = parseCalc my_tokens
-        putStrLn ("Parser: " ++ show parsed)
-        putStrLn ("Type Checking: ") -- ++ show parsed)
+        --putStrLn ("Parser: " ++ show parsed)
 
-        
 
-        let typedResult = map (typeOf []) parsed
+------------------------------------
+        --putStrLn ("Type Checking: ") -- ++ show parsed)
+
+        let input_type = [ Variable List name (actualList) | (name, actualList) <- to_env_list]
+        let pre_type_env = preEvalTypesLoop input_type []
+        let typedResult = evalTypesLoop parsed pre_type_env
         let unparsedTypeList = map (unparseType) typedResult
-        putStrLn ("Type Checking Passed with type " ++ show unparsedTypeList)
-
-
+        --putStrLn ("Type Checking Passed with type " ++ show unparsedTypeList)
+        
+---------------------
         let result = mainLoop (parsed, to_env_list)
-        putStrLn (show result)
+        --putStrLn (show result)
 
         
         let actualResult = getMeTheResult result
-        putStrLn (show actualResult)
+        --putStrLn (show actualResult)
 
         let me = intercalate "\n" (map show actualResult)
+        putStrLn me
         writeFile "output.txt" me
 
 

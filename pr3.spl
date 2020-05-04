@@ -1,0 +1,26 @@
+List results = []
+Integer counter = 1
+Integer listLength = mylist2.length()
+Integer a = 0
+Integer b = 0
+Integer mkm = 0
+
+results.push(0)
+
+while (counter <= listLength){
+
+	mkm = counter modulo 2
+	b = mylist2.pop()
+	
+	if ( mkm == 0){
+		results.push(b)
+		
+		a = mylist1.pop()
+		results.push(a)
+	}
+
+	counter = counter + 1
+
+}
+
+results.reverse()

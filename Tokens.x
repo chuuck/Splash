@@ -17,22 +17,22 @@ tokens :-
   List                            { tok (\p s -> TokenTypeList p) }
   File                            { tok (\p s -> TokenTypeFile p) }
   Boolean                         { tok (\p s -> TokenTypeBoolean p) }
-  readFLine                       { tok (\p s -> TokenReadFLine p) }
-  print                           { tok (\p s -> TokenPrint p) }
   if                              { tok (\p s -> TokenIf p) }
   else                            { tok (\p s -> TokenElse p) }
   true                            { tok (\p s -> TokenTrue p) }           
   false                           { tok (\p s -> TokenFalse p) }
   while                           { tok (\p s -> TokenWhile p) }
   end                             { tok (\p s -> TokenEnd p) }
-  println                         { tok (\p s -> TokenPrintln p) }
   pop                             { tok (\p s -> TokenPop p) }
   push                            { tok (\p s -> TokenPush p) }
   modulo                          { tok (\p s -> TokenModulo p) }
   length                          { tok (\p s -> TokenLength p) }
   sum                             { tok (\p s -> TokenSum p) }
   reverse                         { tok (\p s -> TokenReverse p) }
-  
+  div                             { tok (\p s -> TokenDiv p) }
+  get                             { tok (\p s -> TokenGet p) }
+  take                            { tok (\p s -> TokenTake p) }
+  drop                            { tok (\p s -> TokenDrop p) }
 
   [\=]			                      { tok (\p s -> TokenEq p ) }
   [\"]                            { tok (\p s -> TokenQuote p ) }
@@ -54,6 +54,7 @@ tokens :-
   \>=                             { tok (\p s -> TokenGTEquals p ) }
   \==                             { tok (\p s -> TokenEquals p ) }
   \!=                             { tok (\p s -> TokenNotEquals p ) }
+  \^                              { tok (\p s -> TokenExp p ) }
 
 
   $digit+				                  { tok (\p s -> TokenInt p (read s)) }
@@ -74,16 +75,13 @@ data Token =
   TokenTypeFile AlexPosn            |
   TokenEq AlexPosn                  |
   TokenQuote AlexPosn               |
-  TokenReadFLine AlexPosn           |
   TokenDot AlexPosn                 |
-  TokenPrint AlexPosn               |
   TokenIf AlexPosn                  |
   TokenElse AlexPosn                |
   TokenTrue AlexPosn                |
   TokenFalse AlexPosn               |
   TokenSemi AlexPosn                |
   TokenWhile AlexPosn               |
-  TokenPrintln AlexPosn             |
   TokenTypeBoolean AlexPosn         |
   TokenPop AlexPosn                 |
   TokenPush AlexPosn                |
@@ -91,7 +89,12 @@ data Token =
   TokenLength AlexPosn              |
   TokenNotEquals AlexPosn           |
   TokenSum AlexPosn                 |
-  TokenReverse AlexPosn             |     
+  TokenReverse AlexPosn             |  
+  TokenDiv AlexPosn                 |   
+  TokenGet AlexPosn                 |
+  TokenTake AlexPosn                |
+  TokenDrop AlexPosn                |
+  TokenExp AlexPosn                 |
 
   TokenLParen AlexPosn              |
   TokenRParen AlexPosn              |
