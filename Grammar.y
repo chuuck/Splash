@@ -36,6 +36,7 @@ import Tokens
     '>='                { TokenGTEquals _ }       
     '=='                { TokenEquals _  }
     '!='                { TokenNotEquals _ }
+    '^'                 { TokenExp _ } 
 
 
     Boolean             { TokenTypeBoolean _ }
@@ -54,14 +55,20 @@ import Tokens
     length              { TokenLength _ }
     sum                 { TokenSum _ }
     reverse             { TokenReverse _ }
+    div                 { TokenDiv _ }
+    get                 { TokenGet _ }
+    take                { TokenTake _ }
+    drop                { TokenDrop _ }
 
     int                 { TokenInt _ $$ } 
     var                 { TokenVar _ $$ } 
 
 %right '='
-%left '*' '-' '+' 
-%left NEG
 %nonassoc '>' '<' '<=' '>=' '!=' '=='
+%left '+' '-' 
+%left '*' 
+%right '^'
+%left NEG
 %nonassoc Boolean Integer Str List File if else true false while push pop modulo length sum reverse
 %nonassoc '[' ']' '{' '}' ',' '(' ')' '.' '"'
 
@@ -100,11 +107,17 @@ Exp : Type var '=' Exp                                  { Variable $1 $2 $4 }
     | var '.' push '(' Exp ')'                          { Push $1 $5}
     | while '(' Exp ')' '{' Block '}'                   { WhileLoop $3 $6 }
     | Exp modulo Exp                                    { Modulo $1 $3 }
+    | Exp div Exp                                       { Div $1 $3 }
     | var '.' length '('')'                             { Length $1 }
     | if '(' Exp ')' '{' Block '}'                      { JustIf $3 $6 }
     | var '.' sum '(' ')'                               { Sum $1 }
     | var '.' reverse '(' ')'                           { Reverse $1 }
     | '-' Exp %prec NEG                                 { Negate $2 }
+    | var '.' get '(' Exp ')'                           { Get $1 $5 }
+    | var '.' take '(' Exp ')'                          { Take $1 $5 }
+    | var '.' drop '(' Exp ')'                          { Drop $1 $5 }
+    | Exp '^' Exp                                       { Expo $1 $3}
+
 
 Type : Integer               { Integer }
     | Str                    { StringT }
@@ -162,6 +175,11 @@ data Exp =
         | Sum String
         | Reverse String
         | Negate Exp
+        | Div Exp Exp
+        | Get String Exp
+        | Take String Exp
+        | Drop String Exp
+        | Expo Exp Exp
     
 
          deriving (Show,Eq)

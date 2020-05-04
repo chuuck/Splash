@@ -17,6 +17,12 @@ data Frame = HPlus Exp Environment | PlusH Exp
             | HAnd Exp Environment | AndH Exp
             | HEquals Exp Environment | EqualsH Exp
             | HJustIf Block Environment
+            | HNotEquals Exp Environment | NotEqualsH Exp
+            | HTake String 
+            | HDiv Exp Environment | DivH Exp
+            | HDrop String
+            | HGet String
+            | HExpo Exp Environment | ExpoH Exp
               deriving (Show,Eq)
 
 type Kontinuation = [ Frame ]
@@ -69,6 +75,14 @@ eval1 ((Times e1 e2),env,k) = (e1',env,(HTimes e2' env):k)
                   e2' = if (isValueVar e2) then getValueBinding (unparse e2) env else e2
 eval1 ((TmInt n),env1,(HTimes e env2):k) = (e,env2,(TimesH (TmInt n)) : k)
 eval1 ((TmInt m),env,(TimesH (TmInt n)):k) = (TmInt (n * m),env,k)
+
+-- Evaluation rules for Exponent operator
+eval1 ((Expo e1 e2),env,k) = (e1',env,(HExpo e2' env):k)
+            where e1' = if (isValueVar e1) then getValueBinding (unparse e1) env else e1
+                  e2' = if (isValueVar e2) then getValueBinding (unparse e2) env else e2
+eval1 ((TmInt n),env1,(HExpo e env2):k) = (e,env2,(ExpoH (TmInt n)) : k)
+eval1 ((TmInt m),env,(ExpoH (TmInt n)):k) = (TmInt (nr),env,k)
+                        where nr = exponent' n m
 
 -- Evaluation rules for minus operator
 eval1 ((Minus e1 e2),env,k) = (e1',env,(HMinus e2' env):k)
@@ -131,6 +145,14 @@ eval1 ((TmInt n),env1,(HEquals e env2):k) = (e,env2,(EqualsH (TmInt n)) : k)
 eval1 ((TmInt m),env,(EqualsH (TmInt n)):k) | n == m = (TTrue,env,k)
                                             | otherwise = (TFalse,env,k)
 
+-- Evaluation rules for NotEquals operator
+eval1 ((NotEquals e1 e2),env,k) = (e1',env,(HNotEquals e2' env):k)
+            where e1' = if (isValueVar e1) then getValueBinding (unparse e1) env else e1
+                  e2' = if (isValueVar e2) then getValueBinding (unparse e2) env else e2
+eval1 ((TmInt n),env1,(HNotEquals e env2):k) = (e,env2,(NotEqualsH (TmInt n)) : k)
+eval1 ((TmInt m),env,(NotEqualsH (TmInt n)):k) | n /= m = (TTrue,env,k)
+                                            | otherwise = (TFalse,env,k)
+
 --Evaluation rulos for && operation
 --eval1 ((And e1 e2),env,k) = (e1,env,(HAnd e2 env):k)
 --eval1 ((TTrue) ,env1,(HAnd e2' env2):k) = (TTrue,env2,(AndH (TTrue)) : k)
@@ -159,6 +181,12 @@ eval1 ((Modulo e1 e2),env,k) = (e1',env,(HModulo e2' env):k)
 eval1 ((TmInt n),env1,(HModulo e env2):k) = (e,env2,(ModuloH (TmInt n)) : k)
 eval1 ((TmInt m),env,(ModuloH (TmInt n)):k) = (TmInt (n `mod` m),env,k)
 
+--Evaluation rules for div operation
+eval1 ((Div e1 e2),env,k) = (e1',env,(HDiv e2' env):k)
+            where e1' = if (isValueVar e1) then getValueBinding (unparse e1) env else e1
+                  e2' = if (isValueVar e2) then getValueBinding (unparse e2) env else e2
+eval1 ((TmInt n),env1,(HDiv e env2):k) = (e,env2,(DivH (TmInt n)) : k)
+eval1 ((TmInt m),env,(DivH (TmInt n)):k) = (TmInt (n `div` m),env,k)
 
 --Evaluation rules for while loop
 eval1 ((WhileLoop e eblock), env, k) = (e, env, (HWhileLoop e eblock):k)
@@ -179,6 +207,28 @@ eval1 ((Push varName e), env, k) = (e', env, (HPush varName):k)
 eval1 ((TmInt n), env, (HPush varName):k) = ((ListVar my_new_list), env2, k)
                   where env2 = updateEnv env varName (ListVar my_new_list)
                         my_new_list = (TmInt n) : my_list
+                        my_list = getList (getValueBinding varName env)
+
+--Evaluation rules for take operation on a list
+eval1 ((Take varName e), env, k) = (e', env, (HTake varName):k)
+            where e' = if (isValueVar e) then getValueBinding (unparse e) env else e
+eval1 ((TmInt n), env, (HTake varName):k) = ((ListVar my_new_list), env, k)
+                  where my_new_list = take n my_list
+                        my_list = getList (getValueBinding varName env)
+
+--Evaluation rules for get operation on a list
+eval1 ((Get varName e), env, k) = (e', env, (HGet varName):k)
+            where e' = if (isValueVar e) then getValueBinding (unparse e) env else e
+eval1 ((TmInt n), env, (HGet varName):k) = ((my_new_nr), env, k)
+                  where my_new_nr = head my_list
+                        my_list = getList (getValueBinding varName env)
+
+
+--Evaluation rules for drop operation on a list
+eval1 ((Drop varName e), env, k) = (e', env, (HDrop varName):k)
+            where e' = if (isValueVar e) then getValueBinding (unparse e) env else e
+eval1 ((TmInt n), env, (HDrop varName):k) = ((ListVar my_new_list), env, k)
+                  where my_new_list = drop n my_list
                         my_list = getList (getValueBinding varName env)
 
 --Evalation rules for revers operation on a list
@@ -226,6 +276,10 @@ checkForNegate (x:xs) = patNegate x : checkForNegate xs
 patNegate (TmInt n) = TmInt n
 patNegate (Negate (TmInt n)) = TmInt (0-n)
 
+
+exponent' x 0 = 1
+exponent' x y = x * exponent' x (y-1)  
+
 -- Function to unparse underlying values from the AST term
 --unparse :: Exp -> String 
 unparse (TmInt n) = show n
@@ -239,7 +293,6 @@ isValueVar _ = False
 
 unparseList [] = []
 unparseList (x:xs) = takeInt x : unparseList xs
-
 
 takeInt (TmInt n) = n
 
