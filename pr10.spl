@@ -1,0 +1,49 @@
+List results = []
+List fibb = [1,1]
+Integer counter = 2
+Integer listLength = mylist1.length()
+
+Integer next = 0
+List temp = []
+
+while (counter < listLength){
+
+	temp = fibb.take(2)
+	next = temp.sum()
+	fibb.push(next)
+	counter = counter + 1
+}
+
+fibb.reverse()
+counter = 1
+
+Integer a = 0
+Integer b = 0
+Integer sndCounter = 1
+Integer newElem = 0
+Integer tempLength = 0
+List smallFibb = []
+
+Integer testSum = 0
+while (counter <= listLength){
+	temp = mylist1.take(counter)
+	tempLength = temp.length()
+	smallFibb = fibb.take(counter)
+	smallFibb.reverse()
+
+	while (sndCounter <= tempLength){
+		
+		a = smallFibb.pop()
+		b = temp.pop()
+		
+		newElem = newElem + a * b
+		sndCounter = sndCounter + 1
+	}
+
+	results.push(newElem)
+	sndCounter = 1
+	counter = counter + 1
+	newElem = 0		
+}
+
+results.reverse()

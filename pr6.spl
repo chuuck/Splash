@@ -1,0 +1,48 @@
+List results = []
+Integer counter = 0
+Integer listLength = mylist1.length()
+
+Integer a = 0
+Integer step = 2
+Integer isSmall = 1
+
+Integer endCounter = 0
+
+while (counter < listLength){
+	
+	if (isSmall == 1){
+		a = mylist1.pop()
+		counter = counter + 1
+	}else{
+		a = mylist2.pop()
+	}
+
+	results.push(a)
+	step = step - 1
+		
+	if (step == 0){
+		if (isSmall == 1){
+			isSmall = 0
+			step = 3
+		}else{
+			isSmall = 1
+			step = 2
+		}
+		
+	}
+	
+}
+
+listLength = mylist2.length()
+
+if (isSmall == 0){ 
+	if (step > listLength){ step = listLength + 0}	
+
+	while (step > 0){
+        	a = mylist2.pop()
+        	results.push(a)
+		step = step - 1
+	}
+}
+
+results.reverse()

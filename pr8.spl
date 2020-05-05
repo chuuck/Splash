@@ -1,0 +1,34 @@
+List results = []
+Integer counter = 0
+Integer listLength = mylist1.length()
+
+Integer checkSum = 0
+Integer a = 0
+Integer b = 0
+
+Integer afterFive = 0
+
+while (counter < listLength){
+
+	a = mylist1.pop()
+	b = mylist2.pop()
+
+	results.push(a)
+	results.push(b)
+
+	checkSum = checkSum + a - b
+
+	afterFive = afterFive + 1
+	
+	if (afterFive == 5){
+		afterFive = 0
+		results.push(checkSum)
+		checkSum = 0	
+
+	}
+	
+	
+	counter = counter + 1
+}
+
+results.reverse()
